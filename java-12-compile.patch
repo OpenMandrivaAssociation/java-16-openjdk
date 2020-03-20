@@ -1,0 +1,14 @@
+diff -up openjdk/src/jdk.crypto.cryptoki/share/native/libj2pkcs11/pkcs11wrapper.h.omv~ openjdk/src/jdk.crypto.cryptoki/share/native/libj2pkcs11/pkcs11wrapper.h
+--- openjdk/src/jdk.crypto.cryptoki/share/native/libj2pkcs11/pkcs11wrapper.h.omv~	2019-02-14 18:47:55.481557046 +0100
++++ openjdk/src/jdk.crypto.cryptoki/share/native/libj2pkcs11/pkcs11wrapper.h	2019-02-14 18:49:42.450345463 +0100
+@@ -170,8 +170,8 @@
+ #define min(a, b)       (((a) < (b)) ? (a) : (b))
+ #endif
+ 
+-#define ckBBoolToJBoolean(x) ((x == TRUE) ? JNI_TRUE : JNI_FALSE);
+-#define jBooleanToCKBBool(x) ((x == JNI_TRUE) ? TRUE : FALSE);
++#define ckBBoolToJBoolean(x) ((x) ? JNI_TRUE : JNI_FALSE);
++#define jBooleanToCKBBool(x) ((x == JNI_TRUE) ? 1 : 0);
+ 
+ #define ckByteToJByte(x) ((jbyte) x)
+ #define jByteToCKByte(x) ((CK_BYTE) x)

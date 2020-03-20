@@ -1,0 +1,12 @@
+diff -up openjdk/src/jdk.crypto.cryptoki/share/native/libj2pkcs11/p11_convert.c.omv~ openjdk/src/jdk.crypto.cryptoki/share/native/libj2pkcs11/p11_convert.c
+--- openjdk/src/jdk.crypto.cryptoki/share/native/libj2pkcs11/p11_convert.c.omv~	2019-09-21 10:36:54.069646376 +0200
++++ openjdk/src/jdk.crypto.cryptoki/share/native/libj2pkcs11/p11_convert.c	2019-09-21 10:37:15.900024315 +0200
+@@ -1438,7 +1438,7 @@ CK_VOID_PTR jMechParamToCKMechParamPtrSl
+                     (CK_X9_42_DH2_DERIVE_PARAMS_PTR) ckpParamPtr);
+             break;
+         // defined by pkcs11.h but we don't support
+-        case CKM_KEA_DERIVE: // CK_KEA_DERIVE_PARAMS
++        case CKM_KEA_KEY_DERIVE: // CK_KEA_DERIVE_PARAMS
+         case CKM_RC2_CBC: // CK_RC2_CBC_PARAMS
+         case CKM_RC2_MAC_GENERAL: // CK_RC2_MAC_GENERAL_PARAMS
+         case CKM_RC5_ECB: // CK_RC5_PARAMS

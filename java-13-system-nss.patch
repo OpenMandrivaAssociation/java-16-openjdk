@@ -1,0 +1,32 @@
+diff -up openjdk/src/jdk.crypto.ec/share/native/libsunec/impl/ec.c.omv~ openjdk/src/jdk.crypto.ec/share/native/libsunec/impl/ec.c
+--- openjdk/src/jdk.crypto.ec/share/native/libsunec/impl/ec.c.omv~	2019-12-22 16:32:09.428725376 +0100
++++ openjdk/src/jdk.crypto.ec/share/native/libsunec/impl/ec.c	2019-12-22 16:39:22.825704349 +0100
+@@ -353,6 +353,7 @@ cleanup:
+ 
+ }
+ 
++#ifndef SYSTEM_NSS
+ /* Generates a new EC key pair. The private key is a supplied
+  * random value (in seed) and the public key is the result of
+  * performing a scalar point multiplication of that value with
+@@ -1089,3 +1090,4 @@ cleanup:
+ 
+     return rv;
+ }
++#endif
+diff -up openjdk/src/jdk.crypto.ec/share/native/libsunec/impl/ecdecode.c.omv~ openjdk/src/jdk.crypto.ec/share/native/libsunec/impl/ecdecode.c
+--- openjdk/src/jdk.crypto.ec/share/native/libsunec/impl/ecdecode.c.omv~	2019-12-22 16:37:38.155709428 +0100
++++ openjdk/src/jdk.crypto.ec/share/native/libsunec/impl/ecdecode.c	2019-12-22 16:38:15.036707638 +0100
+@@ -154,6 +154,7 @@ cleanup:
+ 
+ ECCurveName SECOID_FindOIDTag(const SECItem *);
+ 
++#ifndef SYSTEM_NSS
+ SECStatus
+ EC_FillParams(PRArenaPool *arena, const SECItem *encodedParams,
+     ECParams *params, int kmflag)
+@@ -640,3 +641,4 @@ EC_DecodeParams(const SECItem *encodedPa
+         return SECSuccess;
+     }
+ }
++#endif
