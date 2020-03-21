@@ -4,7 +4,7 @@
 # Without bootstrap, the package BuildRequires
 # rpm-javamacros (which in turn requires this package)
 # so jmod(*) and java(*) Provides: can be generated correctly.
-%bcond_without bootstrap
+%bcond_with bootstrap
 
 # OpenJDK builds a lot of underlinked libraries and tools...
 %global _disable_ld_no_undefined 1
@@ -21,7 +21,7 @@
 
 Name:		java-14-openjdk
 Version:	14.0.0
-Release:	1
+Release:	2
 Summary:	Java Runtime Environment (JRE) %{major}
 Group:		Development/Languages
 License:	GPLv2, ASL 1.1, ASL 2.0, LGPLv2.1
