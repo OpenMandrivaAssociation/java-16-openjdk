@@ -5,6 +5,12 @@
 # rpm-javamacros (which in turn requires this package)
 # so jmod(*) and java(*) Provides: can be generated correctly.
 %bcond_with bootstrap
+# Using rpm's debug package splitter is suboptimal because OpenJDK
+# packages various shared library files inside zip (jmod) packages.
+# Those aren't seen by the splitter and therefore get insanely large.
+# Better to use OpenJDK's own debuginfo splitter here even if it
+# results in somewhat nonstandard locations for debuginfo files.
+%global debug_package %{nil}
 
 # OpenJDK builds a lot of underlinked libraries and tools...
 %global _disable_ld_no_undefined 1
@@ -21,7 +27,7 @@
 
 Name:		java-14-openjdk
 Version:	14.0.0
-Release:	2
+Release:	3
 Summary:	Java Runtime Environment (JRE) %{major}
 Group:		Development/Languages
 License:	GPLv2, ASL 1.1, ASL 2.0, LGPLv2.1
@@ -114,6 +120,16 @@ Provides:	java-headless = 1:%{version}-%{release}
 %description
 OpenJDK Java runtime and development environment
 
+# Macro for packaging individual jmod files
+%define modpackage()\
+%%package module-%{1}\
+Summary: The Java %{1} module, provided by OpenJDK\
+Group: Development/Languages\
+%%description module-%{1}\
+The Java %{1} module, provided by OpenJDK\
+%%files module-%{1}\
+%{_jvmdir}/java-%{major}-openjdk/jmods/%{1}.jmod
+
 %package gui
 Summary:	Graphical user interface libraries for OpenJDK %{major}
 Group:		Development/Languages
@@ -152,12 +168,27 @@ Provides:	java-devel = %{EVRD}
 %description devel
 Java Development Kit (JDK) %{major}
 
+%package source
+Summary:	Source files for the Java class library
+Group:		Development/Languages
+Recommends:	%{name} = %{EVRD}
+
+%description source
+Source files for the Java class library
+
 %package demo
 Summary:	Demo/Example applications for OpenJDK
 Group:		Development/Languages
 
 %description demo
 Demo/Example applications for OpenJDK
+
+%package debug
+Summary:	Debug information for package %{name}
+Group:		Development/Debug
+
+%description debug
+Debug information for package %{name}
 
 %prep
 %autosetup -p1 -n openjdk
@@ -211,7 +242,7 @@ if ! bash ../configure \
 	--with-vendor-url="http://openmandriva.org/" \
 	--with-vendor-version-string="OpenMandriva-%{version}-%{release}" \
 	--with-debug-level=release \
-	--with-native-debug-symbols=internal \
+	--with-native-debug-symbols=external \
 	--enable-unlimited-crypto \
 	--enable-system-nss \
 	--with-freetype=system \
@@ -266,6 +297,9 @@ mkdir -p %{buildroot}%{_mandir}
 mv %{buildroot}%{_jvmdir}/java-%{major}-openjdk/man/* %{buildroot}%{_mandir}
 rmdir %{buildroot}%{_jvmdir}/java-%{major}-openjdk/man
 
+mkdir -p %{buildroot}%{_sysconfdir}/ld.so.conf.d
+echo %{_jvmdir}/java-%{major}-openjdk/lib >%{buildroot}%{_sysconfdir}/ld.so.conf.d/java.conf
+
 mkdir -p %{buildroot}%{_sysconfdir}/profile.d
 cat >%{buildroot}%{_sysconfdir}/profile.d/90java.sh <<'EOF'
 export JAVA_HOME=%{_jvmdir}/java-%{major}-openjdk
@@ -288,7 +322,8 @@ chmod +x %{buildroot}%{_sysconfdir}/profile.d/*.*sh
 %endif
 %dir %{_jvmdir}/java-%{major}-openjdk/bin
 %dir %{_jvmdir}/java-%{major}-openjdk/conf
-%{_jvmdir}/java-%{major}-openjdk/jmods
+%dir %{_jvmdir}/java-%{major}-openjdk/jmods
+%{_jvmdir}/java-%{major}-openjdk/jmods/java.base.jmod
 %dir %{_jvmdir}/java-%{major}-openjdk/legal
 %dir %{_jvmdir}/java-%{major}-openjdk/lib
 %config(noreplace) %{_jvmdir}/java-%{major}-openjdk/conf/*
@@ -343,7 +378,6 @@ chmod +x %{buildroot}%{_sysconfdir}/profile.d/*.*sh
 %{_jvmdir}/java-%{major}-openjdk/lib/psfont.properties.ja
 %{_jvmdir}/java-%{major}-openjdk/lib/security
 %{_jvmdir}/java-%{major}-openjdk/lib/server
-%{_jvmdir}/java-%{major}-openjdk/lib/src.zip
 %{_jvmdir}/java-%{major}-openjdk/lib/tzdb.dat
 %doc %{_jvmdir}/java-%{major}-openjdk/legal/java.base
 %doc %{_jvmdir}/java-%{major}-openjdk/legal/java.compiler
@@ -381,6 +415,7 @@ chmod +x %{buildroot}%{_sysconfdir}/profile.d/*.*sh
 %{_mandir}/man1/jmod.1*
 %{_mandir}/man1/jshell.1*
 %{_sysconfdir}/profile.d/*
+%{_sysconfdir}/ld.so.conf.d/java.conf
 %else
 %dir %{_jvmdir}/java-%{major}-openjdk/man
 %dir %{_jvmdir}/java-%{major}-openjdk/man/man1
@@ -402,6 +437,7 @@ chmod +x %{buildroot}%{_sysconfdir}/profile.d/*.*sh
 %{_jvmdir}/java-%{major}-openjdk/lib/libawt_xawt.so
 %{_jvmdir}/java-%{major}-openjdk/lib/libjawt.so
 %{_jvmdir}/java-%{major}-openjdk/lib/libsplashscreen.so
+%{_jvmdir}/java-%{major}-openjdk/jmods/java.desktop.jmod
 %doc %{_jvmdir}/java-%{major}-openjdk/legal/java.desktop
 %doc %{_jvmdir}/java-%{major}-openjdk/legal/jdk.unsupported.desktop
 
@@ -415,6 +451,14 @@ chmod +x %{buildroot}%{_sysconfdir}/profile.d/*.*sh
 %{_jvmdir}/java-%{major}-openjdk/man/man1/jaotc.1*
 %endif
 %endif
+%{_jvmdir}/java-%{major}-openjdk/jmods/jdk.internal.ed.jmod
+%{_jvmdir}/java-%{major}-openjdk/jmods/jdk.internal.jvmstat.jmod
+%{_jvmdir}/java-%{major}-openjdk/jmods/jdk.internal.le.jmod
+%{_jvmdir}/java-%{major}-openjdk/jmods/jdk.internal.opt.jmod
+%{_jvmdir}/java-%{major}-openjdk/jmods/jdk.internal.vm.ci.jmod
+%{_jvmdir}/java-%{major}-openjdk/jmods/jdk.internal.vm.compiler.jmod
+%{_jvmdir}/java-%{major}-openjdk/jmods/jdk.internal.vm.compiler.management.jmod
+%{_jvmdir}/java-%{major}-openjdk/jmods/jdk.internal.jvmstat.jmod
 %{_jvmdir}/java-%{major}-openjdk/bin/jar
 %{_jvmdir}/java-%{major}-openjdk/bin/jarsigner
 %{_jvmdir}/java-%{major}-openjdk/bin/javac
@@ -535,3 +579,74 @@ chmod +x %{buildroot}%{_sysconfdir}/profile.d/*.*sh
 
 %files demo
 %{_jvmdir}/java-%{major}-openjdk/demo
+
+%files source
+%{_jvmdir}/java-%{major}-openjdk/lib/src.zip
+
+%files debug
+%{_jvmdir}/java-%{major}-openjdk/lib/*.debuginfo
+
+%modpackage java.compiler
+%modpackage java.datatransfer
+%modpackage java.instrument
+%modpackage java.logging
+%modpackage java.management
+%modpackage java.management.rmi
+%modpackage java.naming
+%modpackage java.net.http
+%modpackage java.prefs
+%modpackage java.rmi
+%modpackage java.scripting
+%modpackage java.se
+%modpackage java.security.jgss
+%modpackage java.security.sasl
+%modpackage java.smartcardio
+%modpackage java.sql
+%modpackage java.sql.rowset
+%modpackage java.transaction.xa
+%modpackage java.xml
+%modpackage java.xml.crypto
+
+%modpackage jdk.accessibility
+%modpackage jdk.aot
+%modpackage jdk.attach
+%modpackage jdk.charsets
+%modpackage jdk.compiler
+%modpackage jdk.crypto.cryptoki
+%modpackage jdk.crypto.ec
+%modpackage jdk.dynalink
+%modpackage jdk.editpad
+%modpackage jdk.hotspot.agent
+%modpackage jdk.httpserver
+%modpackage jdk.incubator.foreign
+%modpackage jdk.incubator.jpackage
+%modpackage jdk.jartool
+%modpackage jdk.javadoc
+%modpackage jdk.jcmd
+%modpackage jdk.jconsole
+%modpackage jdk.jdeps
+%modpackage jdk.jdi
+%modpackage jdk.jdwp.agent
+%modpackage jdk.jfr
+%modpackage jdk.jlink
+%modpackage jdk.jshell
+%modpackage jdk.jsobject
+%modpackage jdk.jstatd
+%modpackage jdk.localedata
+%modpackage jdk.management.agent
+%modpackage jdk.management.jfr
+%modpackage jdk.management
+%modpackage jdk.naming.dns
+%modpackage jdk.naming.rmi
+%modpackage jdk.net
+%modpackage jdk.nio.mapmode
+%modpackage jdk.rmic
+%modpackage jdk.scripting.nashorn
+%modpackage jdk.scripting.nashorn.shell
+%modpackage jdk.sctp
+%modpackage jdk.security.auth
+%modpackage jdk.security.jgss
+%modpackage jdk.unsupported.desktop
+%modpackage jdk.unsupported
+%modpackage jdk.xml.dom
+%modpackage jdk.zipfs
