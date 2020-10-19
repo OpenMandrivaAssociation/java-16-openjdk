@@ -1,0 +1,24 @@
+diff -up openjdk/src/jdk.crypto.cryptoki/share/native/libj2pkcs11/p11_convert.c.omv~ openjdk/src/jdk.crypto.cryptoki/share/native/libj2pkcs11/p11_convert.c
+--- openjdk/src/jdk.crypto.cryptoki/share/native/libj2pkcs11/p11_convert.c.omv~	2020-10-19 16:01:54.532719666 +0200
++++ openjdk/src/jdk.crypto.cryptoki/share/native/libj2pkcs11/p11_convert.c	2020-10-19 16:02:06.560871871 +0200
+@@ -1471,7 +1471,7 @@ CK_VOID_PTR jMechParamToCKMechParamPtrSl
+             ckpParamPtr = jX942Dh2DeriveParamToCKX942Dh2DeriveParamPtr(env, jParam, ckpLength);
+             break;
+         // defined by pkcs11.h but we don't support
+-        case CKM_KEA_DERIVE: // CK_KEA_DERIVE_PARAMS
++        case CKM_KEA_KEY_DERIVE: // CK_KEA_DERIVE_PARAMS
+         case CKM_RC2_CBC: // CK_RC2_CBC_PARAMS
+         case CKM_RC2_MAC_GENERAL: // CK_RC2_MAC_GENERAL_PARAMS
+         case CKM_RC5_ECB: // CK_RC5_PARAMS
+diff -up openjdk/src/jdk.crypto.cryptoki/share/native/libj2pkcs11/p11_util.c.omv~ openjdk/src/jdk.crypto.cryptoki/share/native/libj2pkcs11/p11_util.c
+--- openjdk/src/jdk.crypto.cryptoki/share/native/libj2pkcs11/p11_util.c.omv~	2020-10-19 16:02:41.622315525 +0200
++++ openjdk/src/jdk.crypto.cryptoki/share/native/libj2pkcs11/p11_util.c	2020-10-19 16:06:38.215308758 +0200
+@@ -381,7 +381,7 @@ void freeCKMechanismPtr(CK_MECHANISM_PTR
+                  case CKM_TLS_MAC:
+                  case CKM_AES_CTR:
+                  case CKM_RSA_PKCS_PSS:
+-                 case CKM_CAMELLIA_CTR:
++                 //case CKM_CAMELLIA_CTR: // FIXME gone in nss 3.56 -- does anything replace this?
+                      // params do not contain pointers
+                      break;
+                  default:
