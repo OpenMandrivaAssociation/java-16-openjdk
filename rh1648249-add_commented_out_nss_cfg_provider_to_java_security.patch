@@ -1,11 +1,18 @@
-diff -r 5b86f66575b7 src/share/lib/security/java.security-linux
---- openjdk/src/java.base/share/conf/security/java.security	Tue May 16 13:29:05 2017 -0700
-+++ openjdk/src/java.base/share/conf/security/java.security	Tue Jun 06 14:05:12 2017 +0200
-@@ -83,6 +83,7 @@
- #ifndef solaris
- security.provider.tbd=SunPKCS11
+diff -up openjdk/src/java.base/share/conf/security/java.security.1~ openjdk/src/java.base/share/conf/security/java.security
+--- openjdk/src/java.base/share/conf/security/java.security.1~	2020-10-19 10:54:38.224370673 +0200
++++ openjdk/src/java.base/share/conf/security/java.security	2020-10-19 10:56:08.598815470 +0200
+@@ -78,6 +78,7 @@ security.provider.tbd=SunMSCAPI
+ security.provider.tbd=Apple
  #endif
+ security.provider.tbd=SunPKCS11
 +#security.provider.tbd=SunPKCS11 ${java.home}/lib/security/nss.cfg
  
  #
  # A list of preferred providers for specific algorithms. These providers will
+@@ -1319,4 +1320,4 @@ jdk.io.permissionsUseCanonicalPath=false
+ # properties. In the case that both properties are simultaneously set, the
+ # System value prevails. The default value of the property is "false".
+ #
+-#jdk.security.allowNonCaAnchor=true
+\ No newline at end of file
++#jdk.security.allowNonCaAnchor=true

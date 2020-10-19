@@ -4,7 +4,7 @@
 # Without bootstrap, the package BuildRequires
 # rpm-javamacros (which in turn requires this package)
 # so jmod(*) and java(*) Provides: can be generated correctly.
-%bcond_with bootstrap
+%bcond_without bootstrap
 # Using rpm's debug package splitter is suboptimal because OpenJDK
 # packages various shared library files inside zip (jmod) packages.
 # Those aren't seen by the splitter and therefore get insanely large.
@@ -25,9 +25,9 @@
 # right
 %define oldmajor %(echo $((%{major}-1)))
 
-Name:		java-14-openjdk
-Version:	14.0.0
-Release:	3
+Name:		java-15-openjdk
+Version:	15.0.0
+Release:	1
 Summary:	Java Runtime Environment (JRE) %{major}
 Group:		Development/Languages
 License:	GPLv2, ASL 1.1, ASL 2.0, LGPLv2.1
@@ -35,7 +35,7 @@ URL:		http://openjdk.java.net/
 # Source must be packages from upstream's hg repositories using the
 # update_package.sh script
 # PROJECT_NAME=jdk-updates REPO_NAME=jdk14u VERSION=jdk-14+36 ./generate_source_tarball.sh
-Source0:	jdk-jdk%{major}-jdk-%{major}-ga.tar.zst
+Source0:	jdk-updates-jdk%{major}u-jdk-%{major}-ga.tar.zst
 # Extra tests
 Source50:	TestCryptoLevel.java
 Source51:	TestECDSA.java
@@ -47,17 +47,11 @@ Patch1:		https://src.fedoraproject.org/rpms/java-openjdk/raw/master/f/rh1648242-
 Patch2:		https://src.fedoraproject.org/rpms/java-openjdk/raw/master/f/rh1648644-java_access_bridge_privileged_security.patch
 Patch3:		https://src.fedoraproject.org/rpms/java-openjdk/raw/master/f/rh649512-remove_uses_of_far_in_jpeg_libjpeg_turbo_1_4_compat_for_jdk10_and_up.patch
 Patch4:		https://src.fedoraproject.org/rpms/java-openjdk/raw/master/f/pr3183-rh1340845-support_fedora_rhel_system_crypto_policy.patch
-Patch5:		https://src.fedoraproject.org/rpms/java-openjdk/raw/master/f/pr1983-rh1565658-support_using_the_system_installation_of_nss_with_the_sunec_provider_jdk11.patch
-# Patches from upstream
-Patch100:	https://github.com/openjdk/panama-foreign/commit/af5c725b.patch
 # Patches from OpenMandriva
 Patch1002:	java-12-compile.patch
-#Patch1003:	java-12-buildfix.patch
+Patch1003:	openjdk-15-nss-3.57.patch
 Patch1004:	openjdk-12-system-harfbuzz.patch
 #Patch1005:	openjdk-13-fix-build.patch
-Patch1006:	java-13-system-nss.patch
-Patch1007:	openjdk-14-gcc10.patch
-Patch1008:	openjdk-14-system-nss-3.51.patch
 BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	binutils
@@ -244,7 +238,6 @@ if ! bash ../configure \
 	--with-debug-level=release \
 	--with-native-debug-symbols=external \
 	--enable-unlimited-crypto \
-	--enable-system-nss \
 	--with-freetype=system \
 	--with-zlib=system \
 	--with-giflib=system \
@@ -329,7 +322,6 @@ chmod +x %{buildroot}%{_sysconfdir}/profile.d/*.*sh
 %config(noreplace) %{_jvmdir}/java-%{major}-openjdk/conf/*
 %{_jvmdir}/java-%{major}-openjdk/release
 %{_jvmdir}/java-%{major}-openjdk/bin/java
-%{_jvmdir}/java-%{major}-openjdk/bin/jjs
 %{_jvmdir}/java-%{major}-openjdk/bin/jpackage
 %{_jvmdir}/java-%{major}-openjdk/bin/keytool
 %{_jvmdir}/java-%{major}-openjdk/bin/rmid
@@ -403,7 +395,6 @@ chmod +x %{buildroot}%{_sysconfdir}/profile.d/*.*sh
 %{_jvmdir}/jre-%{major}-openjdk
 %if %{with system_jdk}
 %{_mandir}/man1/java.1*
-%{_mandir}/man1/jjs.1*
 %{_mandir}/man1/jpackage.1*
 %{_mandir}/man1/keytool.1*
 %{_mandir}/man1/rmid.1*
@@ -420,7 +411,6 @@ chmod +x %{buildroot}%{_sysconfdir}/profile.d/*.*sh
 %dir %{_jvmdir}/java-%{major}-openjdk/man
 %dir %{_jvmdir}/java-%{major}-openjdk/man/man1
 %{_jvmdir}/java-%{major}-openjdk/man/man1/java.1*
-%{_jvmdir}/java-%{major}-openjdk/man/man1/jjs.1*
 %{_jvmdir}/java-%{major}-openjdk/man/man1/jpackage.1*
 %{_jvmdir}/java-%{major}-openjdk/man/man1/keytool.1*
 %{_jvmdir}/java-%{major}-openjdk/man/man1/rmid.1*
@@ -482,7 +472,6 @@ chmod +x %{buildroot}%{_sysconfdir}/profile.d/*.*sh
 %{_jvmdir}/java-%{major}-openjdk/bin/jstack
 %{_jvmdir}/java-%{major}-openjdk/bin/jstat
 %{_jvmdir}/java-%{major}-openjdk/bin/jstatd
-%{_jvmdir}/java-%{major}-openjdk/bin/rmic
 %{_jvmdir}/java-%{major}-openjdk/bin/serialver
 %if %{with system_jdk}
 %{_mandir}/man1/jar.1*
@@ -501,7 +490,6 @@ chmod +x %{buildroot}%{_sysconfdir}/profile.d/*.*sh
 %{_mandir}/man1/jstack.1*
 %{_mandir}/man1/jstat.1*
 %{_mandir}/man1/jstatd.1*
-%{_mandir}/man1/rmic.1*
 %{_mandir}/man1/serialver.1*
 %else
 %{_jvmdir}/java-%{major}-openjdk/man/man1/jar.1*
@@ -520,7 +508,6 @@ chmod +x %{buildroot}%{_sysconfdir}/profile.d/*.*sh
 %{_jvmdir}/java-%{major}-openjdk/man/man1/jstack.1*
 %{_jvmdir}/java-%{major}-openjdk/man/man1/jstat.1*
 %{_jvmdir}/java-%{major}-openjdk/man/man1/jstatd.1*
-%{_jvmdir}/java-%{major}-openjdk/man/man1/rmic.1*
 %{_jvmdir}/java-%{major}-openjdk/man/man1/serialver.1*
 %endif
 %doc %{_jvmdir}/java-%{major}-openjdk/legal/jdk.accessibility
@@ -567,9 +554,6 @@ chmod +x %{buildroot}%{_sysconfdir}/profile.d/*.*sh
 %doc %{_jvmdir}/java-%{major}-openjdk/legal/jdk.naming.rmi
 %doc %{_jvmdir}/java-%{major}-openjdk/legal/jdk.net
 %doc %{_jvmdir}/java-%{major}-openjdk/legal/jdk.nio.mapmode
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/jdk.rmic
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/jdk.scripting.nashorn
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/jdk.scripting.nashorn.shell
 %doc %{_jvmdir}/java-%{major}-openjdk/legal/jdk.sctp
 %doc %{_jvmdir}/java-%{major}-openjdk/legal/jdk.security.auth
 %doc %{_jvmdir}/java-%{major}-openjdk/legal/jdk.security.jgss
@@ -584,6 +568,7 @@ chmod +x %{buildroot}%{_sysconfdir}/profile.d/*.*sh
 %{_jvmdir}/java-%{major}-openjdk/lib/src.zip
 
 %files debug
+%{_jvmdir}/java-%{major}-openjdk/bin/*.debuginfo
 %{_jvmdir}/java-%{major}-openjdk/lib/*.debuginfo
 
 %modpackage java.compiler
@@ -640,9 +625,6 @@ chmod +x %{buildroot}%{_sysconfdir}/profile.d/*.*sh
 %modpackage jdk.naming.rmi
 %modpackage jdk.net
 %modpackage jdk.nio.mapmode
-%modpackage jdk.rmic
-%modpackage jdk.scripting.nashorn
-%modpackage jdk.scripting.nashorn.shell
 %modpackage jdk.sctp
 %modpackage jdk.security.auth
 %modpackage jdk.security.jgss

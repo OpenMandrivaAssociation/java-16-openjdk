@@ -1,6 +1,6 @@
-diff -up openjdk/make/lib/Awt2dLibraries.gmk.11~ openjdk/make/lib/Awt2dLibraries.gmk
---- openjdk/make/lib/Awt2dLibraries.gmk.11~	2019-09-20 16:50:17.000000000 +0200
-+++ openjdk/make/lib/Awt2dLibraries.gmk	2019-09-20 16:59:52.231671294 +0200
+diff -up openjdk/make/modules/java.desktop/lib/Awt2dLibraries.gmk.11~ openjdk/make/modules/java.desktop/lib/Awt2dLibraries.gmk
+--- openjdk/make/modules/java.desktop/lib/Awt2dLibraries.gmk.11~	2019-09-20 16:50:17.000000000 +0200
++++ openjdk/make/modules/java.desktop/lib/Awt2dLibraries.gmk	2019-09-20 16:59:52.231671294 +0200
 @@ -532,7 +532,7 @@ endif
  ###########################################################################
  
