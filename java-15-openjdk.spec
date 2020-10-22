@@ -1,5 +1,5 @@
 # Use gcc instead of clang
-%bcond_without gcc
+%bcond_with gcc
 %bcond_without system_jdk
 # Without bootstrap, the package BuildRequires
 # rpm-javamacros (which in turn requires this package)
