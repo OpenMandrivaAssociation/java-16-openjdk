@@ -10,7 +10,9 @@
 # Those aren't seen by the splitter and therefore get insanely large.
 # Better to use OpenJDK's own debuginfo splitter here even if it
 # results in somewhat nonstandard locations for debuginfo files.
-%global debug_package %{nil}
+# This results in partially empty debug packages (debugsource from
+# rpm, *.debug files from OpenJDK build system)
+%global _empty_manifest_terminate_build 0
 
 # OpenJDK builds a lot of underlinked libraries and tools...
 %global _disable_ld_no_undefined 1
@@ -25,22 +27,17 @@
 # right
 %define oldmajor %(echo $((%{major}-1)))
 
-Name:		java-15-openjdk
-Version:	15.0.0
+Name:		java-16-openjdk
+Version:	16.0.2
 Release:	1
 Summary:	Java Runtime Environment (JRE) %{major}
 Group:		Development/Languages
 License:	GPLv2, ASL 1.1, ASL 2.0, LGPLv2.1
 URL:		http://openjdk.java.net/
-# Source must be packages from upstream's hg repositories using the
-# update_package.sh script
-# PROJECT_NAME=jdk-updates REPO_NAME=jdk14u VERSION=jdk-14+36 ./generate_source_tarball.sh
-Source0:	jdk-updates-jdk%{major}u-jdk-%{major}-ga.tar.zst
+Source0:	https://github.com/openjdk/jdk16u/archive/refs/tags/jdk-%{version}-ga.tar.gz
 # Extra tests
 Source50:	TestCryptoLevel.java
 Source51:	TestECDSA.java
-# Used to create source tarballs - not used by the rpm build process itself
-Source100:	remove-intree-libraries.sh
 # Patches from Fedora
 Patch0:		https://src.fedoraproject.org/rpms/java-openjdk/raw/master/f/rh1648249-add_commented_out_nss_cfg_provider_to_java_security.patch
 Patch1:		https://src.fedoraproject.org/rpms/java-openjdk/raw/master/f/rh1648242-accessible_toolkit_crash_do_not_break_jvm.patch
@@ -50,7 +47,7 @@ Patch4:		https://src.fedoraproject.org/rpms/java-openjdk/raw/master/f/pr3183-rh1
 # Patches from OpenMandriva
 Patch1002:	java-12-compile.patch
 Patch1003:	openjdk-15-nss-3.57.patch
-Patch1004:	openjdk-12-system-harfbuzz.patch
+Patch1004:	openjdk-16-glibc-2.34.patch
 #Patch1005:	openjdk-13-fix-build.patch
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -122,7 +119,8 @@ Group: Development/Languages\
 %%description module-%{1}\
 The Java %{1} module, provided by OpenJDK\
 %%files module-%{1}\
-%{_jvmdir}/java-%{major}-openjdk/jmods/%{1}.jmod
+%{_jvmdir}/java-%{major}-openjdk/jmods/%{1}.jmod \
+%optional %doc %{_jvmdir}/java-%{major}-openjdk/legal/%{1}
 
 %package gui
 Summary:	Graphical user interface libraries for OpenJDK %{major}
@@ -185,7 +183,7 @@ Group:		Development/Debug
 Debug information for package %{name}
 
 %prep
-%autosetup -p1 -n openjdk
+%autosetup -p1 -n jdk16u-jdk-%{version}-ga
 
 EXTRA_CFLAGS="$(echo %{optflags} -fuse-ld=bfd -Wno-error -fno-delete-null-pointer-checks -Wformat -Wno-cpp -DSYSTEM_NSS -I%{_includedir}/nss -I%{_includedir}/nspr4 |sed -r -e 's|-O[0-9sz]*||;s|-Werror=format-security||g')"
 EXTRA_CXXFLAGS="$EXTRA_CFLAGS"
@@ -241,6 +239,7 @@ if ! bash ../configure \
 	--with-freetype=system \
 	--with-zlib=system \
 	--with-giflib=system \
+	--with-harfbuzz=system \
 	--with-libjpeg=system \
 	--with-libpng=system \
 	--with-lcms=system \
@@ -318,6 +317,7 @@ chmod +x %{buildroot}%{_sysconfdir}/profile.d/*.*sh
 %dir %{_jvmdir}/java-%{major}-openjdk/jmods
 %{_jvmdir}/java-%{major}-openjdk/jmods/java.base.jmod
 %dir %{_jvmdir}/java-%{major}-openjdk/legal
+%doc %{_jvmdir}/java-%{major}-openjdk/legal/java.base
 %dir %{_jvmdir}/java-%{major}-openjdk/lib
 %config(noreplace) %{_jvmdir}/java-%{major}-openjdk/conf/*
 %{_jvmdir}/java-%{major}-openjdk/release
@@ -362,7 +362,6 @@ chmod +x %{buildroot}%{_sysconfdir}/profile.d/*.*sh
 %{_jvmdir}/java-%{major}-openjdk/lib/librmi.so
 %{_jvmdir}/java-%{major}-openjdk/lib/libsaproc.so
 %{_jvmdir}/java-%{major}-openjdk/lib/libsctp.so
-%{_jvmdir}/java-%{major}-openjdk/lib/libsunec.so
 %{_jvmdir}/java-%{major}-openjdk/lib/libverify.so
 %{_jvmdir}/java-%{major}-openjdk/lib/libzip.so
 %{_jvmdir}/java-%{major}-openjdk/lib/modules
@@ -371,27 +370,6 @@ chmod +x %{buildroot}%{_sysconfdir}/profile.d/*.*sh
 %{_jvmdir}/java-%{major}-openjdk/lib/security
 %{_jvmdir}/java-%{major}-openjdk/lib/server
 %{_jvmdir}/java-%{major}-openjdk/lib/tzdb.dat
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/java.base
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/java.compiler
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/java.datatransfer
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/java.instrument
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/java.logging
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/java.management.rmi
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/java.management
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/java.naming
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/java.net.http
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/java.prefs
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/java.rmi
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/java.scripting
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/java.se
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/java.security.jgss
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/java.security.sasl
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/java.smartcardio
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/java.sql.rowset
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/java.sql
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/java.transaction.xa
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/java.xml.crypto
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/java.xml
 %{_jvmdir}/jre-%{major}-openjdk
 %if %{with system_jdk}
 %{_mandir}/man1/java.1*
@@ -524,7 +502,6 @@ chmod +x %{buildroot}%{_sysconfdir}/profile.d/*.*sh
 %doc %{_jvmdir}/java-%{major}-openjdk/legal/jdk.hotspot.agent
 %doc %{_jvmdir}/java-%{major}-openjdk/legal/jdk.httpserver
 %doc %{_jvmdir}/java-%{major}-openjdk/legal/jdk.incubator.foreign
-%doc %{_jvmdir}/java-%{major}-openjdk/legal/jdk.incubator.jpackage
 %doc %{_jvmdir}/java-%{major}-openjdk/legal/jdk.internal.ed
 %doc %{_jvmdir}/java-%{major}-openjdk/legal/jdk.internal.jvmstat
 %doc %{_jvmdir}/java-%{major}-openjdk/legal/jdk.internal.le
@@ -604,7 +581,7 @@ chmod +x %{buildroot}%{_sysconfdir}/profile.d/*.*sh
 %modpackage jdk.hotspot.agent
 %modpackage jdk.httpserver
 %modpackage jdk.incubator.foreign
-%modpackage jdk.incubator.jpackage
+%modpackage jdk.incubator.vector
 %modpackage jdk.jartool
 %modpackage jdk.javadoc
 %modpackage jdk.jcmd
@@ -614,6 +591,7 @@ chmod +x %{buildroot}%{_sysconfdir}/profile.d/*.*sh
 %modpackage jdk.jdwp.agent
 %modpackage jdk.jfr
 %modpackage jdk.jlink
+%modpackage jdk.jpackage
 %modpackage jdk.jshell
 %modpackage jdk.jsobject
 %modpackage jdk.jstatd

@@ -9,10 +9,3 @@ diff -up openjdk/src/java.base/share/conf/security/java.security.1~ openjdk/src/
  
  #
  # A list of preferred providers for specific algorithms. These providers will
-@@ -1319,4 +1320,4 @@ jdk.io.permissionsUseCanonicalPath=false
- # properties. In the case that both properties are simultaneously set, the
- # System value prevails. The default value of the property is "false".
- #
--#jdk.security.allowNonCaAnchor=true
-\ No newline at end of file
-+#jdk.security.allowNonCaAnchor=true

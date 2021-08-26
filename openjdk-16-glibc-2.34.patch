@@ -1,0 +1,14 @@
+diff -up openjdk/test/hotspot/jtreg/runtime/StackGuardPages/exeinvoke.c.8~ openjdk/test/hotspot/jtreg/runtime/StackGuardPages/exeinvoke.c
+--- openjdk/test/hotspot/jtreg/runtime/StackGuardPages/exeinvoke.c.8~	2021-08-25 22:18:29.985273769 +0200
++++ openjdk/test/hotspot/jtreg/runtime/StackGuardPages/exeinvoke.c	2021-08-25 22:19:22.321395441 +0200
+@@ -68,7 +68,9 @@ static void handler(int sig, siginfo_t *
+ }
+ 
+ void set_signal_handler() {
+-  static char altstack[SIGSTKSZ];
++  static char *altstack=(char*)NULL;
++
++  if(!altstack) altstack=(char*)malloc(SIGSTKSZ);
+ 
+   stack_t ss = {
+     .ss_size = SIGSTKSZ,
