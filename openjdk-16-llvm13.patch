@@ -1,0 +1,11 @@
+--- jdk16u-jdk-16.0.2-ga/src/hotspot/cpu/aarch64/assembler_aarch64.cpp.orig	2021-09-01 11:23:30.418036222 +0100
++++ jdk16u-jdk-16.0.2-ga/src/hotspot/cpu/aarch64/assembler_aarch64.cpp	2021-09-01 11:23:38.057794707 +0100
+@@ -291,7 +291,7 @@
+ }
+ 
+ bool Assembler::operand_valid_for_logical_immediate(bool is32, uint64_t imm) {
+-  return encode_logical_immediate(is32, imm) != 0xffffffff;
++  return asm_util::encode_logical_immediate(is32, imm) != 0xffffffff;
+ }
+ 
+ static uint64_t doubleTo64Bits(jdouble d) {

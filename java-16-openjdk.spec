@@ -49,6 +49,8 @@ Patch1002:	java-12-compile.patch
 Patch1003:	openjdk-15-nss-3.57.patch
 Patch1004:	openjdk-16-glibc-2.34.patch
 #Patch1005:	openjdk-13-fix-build.patch
+Patch1006:	openjdk-16-llvm13.patch
+
 BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	binutils
