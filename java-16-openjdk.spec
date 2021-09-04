@@ -1,6 +1,6 @@
 # Use gcc instead of clang
 %bcond_with gcc
-%bcond_without system_jdk
+%bcond_with system_jdk
 # Without bootstrap, the package BuildRequires
 # rpm-javamacros (which in turn requires this package)
 # so jmod(*) and java(*) Provides: can be generated correctly.
@@ -29,7 +29,7 @@
 
 Name:		java-16-openjdk
 Version:	16.0.2
-Release:	1
+Release:	2
 Summary:	Java Runtime Environment (JRE) %{major}
 Group:		Development/Languages
 License:	GPLv2, ASL 1.1, ASL 2.0, LGPLv2.1
